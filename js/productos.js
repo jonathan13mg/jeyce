@@ -43,36 +43,6 @@ function mostrarSkeletons() {
 
 }
 
-function mostrarSkeletons() {
-
-    listaProductos.innerHTML = "";
-
-    for (let i = 0; i < 6; i++) {
-
-        listaProductos.innerHTML += `
-            <div class="producto-card skeleton-card">
-
-                <div class="skeleton skeleton-imagen"></div>
-
-                <div class="producto-info">
-
-                    <div class="skeleton skeleton-titulo"></div>
-
-                    <div class="skeleton skeleton-precio"></div>
-
-                    <div class="skeleton skeleton-estado"></div>
-
-                    <div class="skeleton skeleton-boton"></div>
-
-                </div>
-
-            </div>
-        `;
-
-    }
-
-}
-
 // Cargar productos únicamente desde Firebase
 async function cargarProductos() {
 
@@ -90,11 +60,6 @@ async function cargarProductos() {
             ...doc.data()
         }));
 
-        // Mostrar solo los productos disponibles
-        productos = productos.filter(
-            p => p.disponible !== false
-        );
-
         crearCategorias();
         mostrarProductos();
 
@@ -104,11 +69,10 @@ async function cargarProductos() {
             "Error al cargar productos desde Firebase:",
             error
         );
-    
+
     }
 
 }
-
 
 // Crear categorías automáticamente
 function crearCategorias() {
