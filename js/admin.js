@@ -105,58 +105,42 @@ categoriaSelect.addEventListener(
 
 async function cargarProductos() {
 
-    const respuesta = await fetch("data/productos.json");
-    const productosBase = await respuesta.json();
+    try {
 
-    const productosGuardados =
-        JSON.parse(localStorage.getItem("jeyce_productos")) || [];
+        const snapshot = await getDocs(
+            collection(db, "productos")
+        );
 
-    mostrarInventario(productosBase, productosGuardados);
+        const productosFirebase = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+
+        mostrarInventario(productosFirebase);
+
+    } catch (error) {
+
+        console.error(
+            "Error al cargar inventario:",
+            error
+        );
+
+        listaAdmin.innerHTML =
+            "<p>No se pudo cargar el inventario.</p>";
+
+    }
 
 }
 
 // =====================
 // MOSTRAR INVENTARIO
 // =====================
-function mostrarInventario(base, guardados) {
+function mostrarInventario(productos) {
 
     listaAdmin.innerHTML = "";
 
-    // Productos base
-    base.forEach(producto => {
-
-        const imagen = producto.imagen.startsWith("data:")
-            ? producto.imagen
-            : `img/productos/${producto.imagen}`;
-
-        listaAdmin.innerHTML += `
-            <div class="producto-card">
-
-                <img src="${imagen}" alt="${producto.nombre}">
-
-                <div class="producto-info">
-
-                    <h3>${producto.nombre}</h3>
-
-                    <p class="precio">Bs ${producto.precio}</p>
-
-                    <p>Stock: ${producto.stock ?? "No definido"}</p>
-
-                    <p>${producto.categoria}</p>
-
-                    <p style="color:#777;font-size:14px;">
-                        Producto base
-                    </p>
-
-                </div>
-
-            </div>
-        `;
-
-    });
-
     // Productos agregados desde el panel
-    guardados.forEach(producto => {
+    productos.forEach(producto => {
 
         // Compatibilidad con productos antiguos (imagen) y nuevos (imagenes[])
         let imagenPrincipal = "";
