@@ -56,8 +56,8 @@ async function cargarProductos() {
         );
 
         productos = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
+            ...doc.data(),
+            id: doc.id
         }));
 
         crearCategorias();
