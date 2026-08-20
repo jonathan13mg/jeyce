@@ -1,3 +1,9 @@
+import {
+    db,
+    doc,
+    getDoc
+} from "./firebase.js";
+
 async function cargarProducto() {
 
     const parametros = new URLSearchParams(
