@@ -12,9 +12,18 @@ async function cargarProducto() {
 
     const id = parametros.get("id");
 
+    if (!id) {
+
+        document.body.innerHTML =
+            "<h1>Producto no encontrado</h1>";
+
+        return;
+
+    }
+
     try {
 
-        // Buscar directamente en Firebase
+        // Buscar el producto directamente en Firebase
         const documento = await getDoc(
             doc(db, "productos", id)
         );
@@ -33,203 +42,322 @@ async function cargarProducto() {
             ...documento.data()
         };
 
-    if (!producto) {
-        document.body.innerHTML = "<h1>Producto no encontrado</h1>";
-        return;
-    }
+        // =====================
+        // GALERÍA DE IMÁGENES
+        // =====================
 
-    // =====================
-    // GALERÍA DE IMÁGENES
-    // Compatible con imagen e imagenes[]
-    // =====================
-    
-    const imagenPrincipal = document.getElementById("imagen-producto");
-    const galeria = document.getElementById("galeria-miniaturas");
+        const imagenPrincipal =
+            document.getElementById("imagen-producto");
 
-    // Obtener todas las imágenes del producto
-    const imagenes = (producto.imagenes && producto.imagenes.length > 0)
-        ? producto.imagenes
-        : [producto.imagen];
+        const galeria =
+            document.getElementById("galeria-miniaturas");
 
-    imagenesActuales = imagenes.map(img =>
-        img.startsWith("data:")
-        ? img
-        : `img/productos/${img}`
-    );
+        // Obtener todas las imágenes
+        const imagenes =
+            (producto.imagenes &&
+             producto.imagenes.length > 0)
+                ? producto.imagenes
+                : [producto.imagen];
 
-    // Imagen principal
-    const imagenPrincipalSrc = imagenes[0].startsWith("data:")
-        ? imagenes[0]
-        : `img/productos/${imagenes[0]}`;
-
-    imagenPrincipal.src = imagenPrincipalSrc;
-
-    imagenPrincipal.addEventListener("click", () => {
-
-        const indice = imagenesActuales.indexOf(imagenPrincipal.src);
-
-        abrirVisor(indice >= 0 ? indice : 0);
-
-    });
-
-    // Limpiar galería
-    galeria.innerHTML = "";
-
-    // Función para cambiar la imagen principal
-    function cambiarImagen(src, miniaturaActiva) {
-
-        imagenPrincipal.src = src;
-
-        document.querySelectorAll(".miniatura").forEach(m =>
-            m.classList.remove("activa")
+        imagenesActuales = imagenes.map(img =>
+            img.startsWith("data:")
+                ? img
+                : `img/productos/${img}`
         );
 
-        miniaturaActiva.classList.add("activa");
+        // Imagen principal
+        const imagenPrincipalSrc =
+            imagenes[0].startsWith("data:")
+                ? imagenes[0]
+                : `img/productos/${imagenes[0]}`;
 
-    }
+        imagenPrincipal.src =
+            imagenPrincipalSrc;
 
-    // Crear miniaturas automáticamente (máximo 5)
-    imagenes.slice(0, 5).forEach((img, index) => {
+        imagenPrincipal.addEventListener(
+            "click",
+            () => {
 
-        const src = img.startsWith("data:")
-            ? img
-            : `img/productos/${img}`;
+                const indice =
+                    imagenesActuales.indexOf(
+                        imagenPrincipal.src
+                    );
 
-        const miniatura = document.createElement("img");
+                abrirVisor(
+                    indice >= 0 ? indice : 0
+                );
 
-        miniatura.src = src;
-        miniatura.className =
-            index === 0 ? "miniatura activa" : "miniatura";
-
-        miniatura.alt = `Imagen ${index + 1}`;
-
-        miniatura.addEventListener("click", () =>
-            cambiarImagen(src, miniatura)
+            }
         );
 
-        galeria.appendChild(miniatura);
+        // Limpiar galería
+        galeria.innerHTML = "";
 
-    });
+        // Cambiar imagen principal
+        function cambiarImagen(
+            src,
+            miniaturaActiva
+        ) {
 
-    document.getElementById("nombre-producto").textContent =
-        producto.nombre;
+            imagenPrincipal.src = src;
 
-    document.getElementById("precio-producto").textContent =
-        `Bs ${producto.precio}`;
+            document
+                .querySelectorAll(".miniatura")
+                .forEach(m =>
+                    m.classList.remove("activa")
+                );
 
-    document.getElementById("categoria-producto").textContent =
-        `${producto.categoria} / ${producto.subcategoria}`;
+            miniaturaActiva
+                .classList.add("activa");
 
-    if (producto.marca) {
+        }
 
-        document.getElementById("marca-producto").textContent =
-           producto.marca;
+        // Crear miniaturas
+        imagenes
+            .slice(0, 5)
+            .forEach((img, index) => {
 
-    } else {
+                const src =
+                    img.startsWith("data:")
+                        ? img
+                        : `img/productos/${img}`;
 
-        document.getElementById("marca-producto")
-            .parentElement.style.display = "none";
+                const miniatura =
+                    document.createElement("img");
+
+                miniatura.src = src;
+
+                miniatura.className =
+                    index === 0
+                        ? "miniatura activa"
+                        : "miniatura";
+
+                miniatura.alt =
+                    `Imagen ${index + 1}`;
+
+                miniatura.addEventListener(
+                    "click",
+                    () =>
+                        cambiarImagen(
+                            src,
+                            miniatura
+                        )
+                );
+
+                galeria.appendChild(
+                    miniatura
+                );
+
+            });
+
+        // =====================
+        // INFORMACIÓN DEL PRODUCTO
+        // =====================
+
+        document
+            .getElementById("nombre-producto")
+            .textContent =
+                producto.nombre;
+
+        document
+            .getElementById("precio-producto")
+            .textContent =
+                `Bs ${producto.precio}`;
+
+        document
+            .getElementById("categoria-producto")
+            .textContent =
+                `${producto.categoria} / ${producto.subcategoria}`;
+
+        if (producto.marca) {
+
+            document
+                .getElementById("marca-producto")
+                .textContent =
+                    producto.marca;
+
+        } else {
+
+            document
+                .getElementById("marca-producto")
+                .parentElement
+                .style.display = "none";
+
+        }
+
+        if (producto.talla) {
+
+            document
+                .getElementById("talla-producto")
+                .textContent =
+                    producto.talla;
+
+        } else {
+
+            document
+                .getElementById("talla-producto")
+                .parentElement
+                .style.display = "none";
+
+        }
+
+        if (producto.estado) {
+
+            document
+                .getElementById("estado-producto")
+                .textContent =
+                    producto.estado;
+
+        } else {
+
+            document
+                .getElementById("estado-producto")
+                .parentElement
+                .style.display = "none";
+
+        }
+
+        if (producto.codigo) {
+
+            document
+                .getElementById("codigo-producto")
+                .textContent =
+                    producto.codigo;
+
+        } else {
+
+            document
+                .getElementById("codigo-producto")
+                .parentElement
+                .style.display = "none";
+
+        }
+
+        if (producto.origen) {
+
+            document
+                .getElementById("origen-producto")
+                .textContent =
+                    producto.origen;
+
+        } else {
+
+            document
+                .getElementById("origen-producto")
+                .parentElement
+                .style.display = "none";
+
+        }
+
+        // =====================
+        // STOCK
+        // =====================
+
+        const stock =
+            producto.stock ?? 0;
+
+        const disponible =
+            stock > 0;
+
+        const stockElemento =
+            document.getElementById(
+                "stock-producto"
+            );
+
+        if (stock === 1) {
+
+            stockElemento.textContent =
+                "Pieza única";
+
+            stockElemento.className =
+                "stock disponible";
+
+        } else if (disponible) {
+
+            stockElemento.textContent =
+                `Disponible (${stock} unidades)`;
+
+            stockElemento.className =
+                "stock disponible";
+
+        } else {
+
+            stockElemento.textContent =
+                "Agotado";
+
+            stockElemento.className =
+                "stock agotado";
+
+        }
+
+        // =====================
+        // DESCRIPCIÓN
+        // =====================
+
+        document
+            .getElementById(
+                "descripcion-producto"
+            )
+            .textContent =
+                "Producto importado con stock limitado. Las unidades son únicas y pueden agotarse rápidamente. Contáctanos por WhatsApp para confirmar disponibilidad y reservar tu compra.";
+
+        // =====================
+        // BOTÓN WHATSAPP
+        // =====================
+
+        const boton =
+            document.getElementById(
+                "btn-comprar"
+            );
+
+        if (disponible) {
+
+            boton.href =
+                `https://wa.me/59175544400?text=Hola,%20quiero%20comprar%20el%20producto%20${encodeURIComponent(producto.nombre)}%20por%20Bs%20${producto.precio}`;
+
+            boton.textContent =
+                "Comprar por WhatsApp";
+
+            boton.classList.remove(
+                "btn-agotado"
+            );
+
+            boton.removeAttribute(
+                "disabled"
+            );
+
+        } else {
+
+            boton.removeAttribute(
+                "href"
+            );
+
+            boton.textContent =
+                "Producto agotado";
+
+            boton.classList.add(
+                "btn-agotado"
+            );
+
+            boton.setAttribute(
+                "disabled",
+                "true"
+            );
+
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Error al cargar el producto:",
+            error
+        );
+
+        document.body.innerHTML =
+            "<h1>Error al cargar el producto</h1>";
 
     }
 
-    if (producto.talla) {
-
-        document.getElementById("talla-producto").textContent =
-            producto.talla;
-
-    } else {
-
-        document.getElementById("talla-producto")
-            .parentElement.style.display = "none";
-
-    }
-
-    if (producto.estado) {
-
-        document.getElementById("estado-producto").textContent =
-            producto.estado;
-
-    } else {
-
-        document.getElementById("estado-producto")
-            .parentElement.style.display = "none";
-
-    }
-
-    if (producto.codigo) {
-
-        document.getElementById("codigo-producto").textContent =
-            producto.codigo;
-
-    } else {
-
-        document.getElementById("codigo-producto")
-            .parentElement.style.display = "none";
-
-    }
-
-    if (producto.origen) {
-
-        document.getElementById("origen-producto").textContent =
-            producto.origen;
-
-    } else {
-
-        document.getElementById("origen-producto")
-            .parentElement.style.display = "none";
-
-    }
-
-    const stock = producto.stock ?? 0;
-    const disponible = stock > 0;
-
-    const stockElemento = document.getElementById("stock-producto");
-
-    if (stock === 1) {
-
-        stockElemento.textContent = "Pieza única";
-        stockElemento.className = "stock disponible";
-
-    } else if (disponible) {
-
-        stockElemento.textContent = `Disponible (${stock} unidades)`;
-        stockElemento.className = "stock disponible";
-
-    } else {
-
-        stockElemento.textContent = "Agotado";
-        stockElemento.className = "stock agotado";
-
-    }
-
-    document.getElementById("descripcion-producto").textContent =
-        "Producto importado con stock limitado. Las unidades son únicas y pueden agotarse rápidamente. Contáctanos por WhatsApp para confirmar disponibilidad y reservar tu compra.";
-
-    const boton = document.getElementById("btn-comprar");
-    
-    if (disponible) {
-        
-        boton.href =
-            `https://wa.me/59175544400?text=Hola,%20quiero%20comprar%20el%20producto%20${encodeURIComponent(producto.nombre)}%20por%20Bs%20${producto.precio}`;
-            
-        boton.textContent = "Comprar por WhatsApp";
-        
-        boton.classList.remove("btn-agotado");
-        
-        boton.removeAttribute("disabled");
-    
-    } else {
-        
-        boton.removeAttribute("href");
-        
-        boton.textContent = "Producto agotado";
-        
-        boton.classList.add("btn-agotado");
-        
-        boton.setAttribute("disabled", "true");
-
-    }
-        
 }
 
 // =====================
