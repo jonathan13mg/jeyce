@@ -1,20 +1,31 @@
 async function cargarProducto() {
 
-    const parametros = new URLSearchParams(window.location.search);
-    const id = Number(parametros.get("id"));
+    const parametros = new URLSearchParams(
+        window.location.search
+    );
 
-    // Productos base del archivo JSON
-    const respuesta = await fetch("data/productos.json");
-    const productosBase = await respuesta.json();
+    const id = parametros.get("id");
 
-    // Productos agregados desde el panel de administración
-    const productosGuardados =
-        JSON.parse(localStorage.getItem("jeyce_productos")) || [];
+    try {
 
-    // Unimos ambos inventarios
-    const productos = [...productosBase, ...productosGuardados];
+        // Buscar directamente en Firebase
+        const documento = await getDoc(
+            doc(db, "productos", id)
+        );
 
-    const producto = productos.find(p => p.id === id);
+        if (!documento.exists()) {
+
+            document.body.innerHTML =
+                "<h1>Producto no encontrado</h1>";
+
+            return;
+
+        }
+
+        const producto = {
+            id: documento.id,
+            ...documento.data()
+        };
 
     if (!producto) {
         document.body.innerHTML = "<h1>Producto no encontrado</h1>";
